@@ -34,8 +34,8 @@ class DashboardController extends Controller
         return response()->json(['error' => false, 'data' => $users]);
     }
 
-    public function getUserById($id) {
-        $user = User::where('id', $id)->first();
+    public function getUserById(Request $request) {
+        $user = User::where('id', $request->id)->first();
         return response()->json(['error' => false, 'data' => $user]);
     }
 

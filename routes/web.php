@@ -33,8 +33,8 @@ Route::group(['middleware' => 'auth', 'user-access:user', 'user-access:admin'], 
 });
 
 Route::group(['middleware' => 'auth', 'user-access:admin'], function () {
-    Route::get('/dashboard/get-users', [App\Http\Controllers\DashboardController::class, 'getAllUser']);
-    Route::get('/dashboard/get-user-by-id/{id}', [App\Http\Controllers\DashboardController::class, 'getUserById']);
+    Route::post('/dashboard/get-users', [App\Http\Controllers\DashboardController::class, 'getAllUser']);
+    Route::post('/dashboard/get-user-by-id', [App\Http\Controllers\DashboardController::class, 'getUserById']);
     Route::post('/dashboard/create-user', [App\Http\Controllers\DashboardController::class, 'createUser']);
     Route::post('/dashboard/edit-user', [App\Http\Controllers\DashboardController::class, 'editUser']);
     Route::post('/dashboard/delete-user', [App\Http\Controllers\DashboardController::class, 'deleteUser']);

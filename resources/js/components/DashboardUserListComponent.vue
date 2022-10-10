@@ -98,11 +98,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Delete Post</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Delete User</h5>
                     <button type="button" ref="CloseDelete" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             <div class="modal-body">
-                Are you sure want to delete this post ?
+                Are you sure want to delete this user ?
             </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -162,8 +162,9 @@ import { Modal, Toast } from 'bootstrap';
         },
         getUsers() {
             this.isLoading = true;
-            axios.get('get-users')
+            axios.post('get-users')
                 .then(response => (
+                    console.log(response),
                     this.users = response.data.data,
                     this.isLoading = false
                 ))
@@ -185,10 +186,12 @@ import { Modal, Toast } from 'bootstrap';
             });
             if (id) {
                 this.userId = id;
-                axios.get('get-user-by-id/'+this.userId)
+                let formData = new FormData();
+                formData.append("id", this.userId);
+                axios.post('get-user-by-id', formData)
                     .then(response => {
-                        this.name = response.data.data.name;
-                        this.email = response.data.data.email;
+                        this.name = response.data?.data?.name;
+                        this.email = response.data?.data?.email;
                         myModal.show();
                     })
             } else {
