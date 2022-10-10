@@ -16,7 +16,7 @@
                 <div class="mb-1">
                     <span class="text-muted">{{ getDay(post.updated_at) }}, {{ getDate(post.updated_at) }}</span>
                 </div>
-                <div> 
+                <div class="mt-3 text-center"> 
                     <img v-if="post?.post_images" :src="post?.post_images?.post_image_path" class="img-fluid" :alt="post?.post_images?.post_image_caption">
                 </div>
                 <div class="my-5">
