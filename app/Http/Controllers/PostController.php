@@ -12,7 +12,7 @@ class PostController extends Controller
 {
     public function getAllPosts() 
     {
-        $posts = Post::with('post_images', 'author')->orderBy('created_at', 'desc')->get();
+        $posts = Post::with('post_images', 'author')->orderBy('created_at', 'desc')->paginate(6);
         return response()->json(['error' => false, 'data' => $posts]);
     }
 

@@ -33,24 +33,36 @@
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-                <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div v-show=!isLoading class="row row-cols-1 row-cols-md-3 g-4">
                     <div v-for="post in posts" class="col">
                         <div class="card h-100  cursor-pointer">
-                            <img v-if="post.post_images" :src="post.post_images.post_image_path" class="card-img-top img-fluid" style="height: 200px;" :alt="post.post_images.post_image_caption">
+                            <img v-if="post?.post_images" :src="post?.post_images.post_image_path" class="card-img-top img-fluid" style="height: 200px;" :alt="post.post_images.post_image_caption">
                             <div class="card-body" @click="redirectPage('/detail/'+post.id)">
                                 <div style="height:100px;">
-                                    <h4 class="card-title text-truncate-4-line">{{ post.title }}</h4>
+                                    <h4 class="card-title text-truncate-4-line">{{ post?.title }}</h4>
                                 </div>
                                 <div class="mt-2">
-                                    <span class="text-muted">By <strong>{{post.author?.name}}</strong></span>
+                                    <span class="text-muted">By <strong>{{post?.author?.name}}</strong></span>
                                 </div>
                                 <div class="mt-1">
-                                    <span class="text-muted">{{calendarDate(post.updated_at)}}</span>
+                                    <span class="text-muted">{{calendarDate(post?.updated_at)}}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div v-show=!isLoading class="float-start mt-3">
+                    <span>Page {{currentPage}} of {{lastPage}}</span>
+                </div>
+                <div v-show=!isLoading class="mt-3 float-end">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li @click="changePage(previousPage)" v-if="previousPage" class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li @click="changePage(nextPage)" v-if="nextPage" class="page-item"><a class="page-link" href="#">Next</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                
             </div>
         </div>
     </div>
@@ -61,23 +73,37 @@
     export default {
     mounted() {
         console.log("Component mounted.");
+        this.url = '/post/get_all'
         this.getAllPosts();
     },
     data() {
         return {
             posts:[],
             isLoading: false,
-            deletePostTemp: ''
+            deletePostTemp: '',
+            nextPage: null,
+            previousPage: null,
+            currentPage: null,
+            lastPage: null,
+            url: ''
         };
     },
     methods: {
         getAllPosts() {
             this.isLoading = true;
-            axios.get('/post/get_all')
+            axios.get(this.url)
                 .then(response => (
                     this.isLoading = false,
-                    this.posts = response.data.data
+                    this.posts = response.data.data.data,
+                    this.nextPage = response.data.data.next_page_url,
+                    this.previousPage = response.data.data.prev_page_url,
+                    this.currentPage = response.data.data.current_page,
+                    this.lastPage = response.data.data.last_page
                 ))
+        },
+        changePage(url) {
+            this.url = url;
+            this.getAllPosts();
         },
         calendarDate(date){
             return moment(date).calendar();
