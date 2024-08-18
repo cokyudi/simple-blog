@@ -18,8 +18,20 @@
                     <input v-model="title" type="text" class="form-control" id="title" placeholder="Title" required>
                 </div>
                 <div class="form-group mb-3">
+                    <label class="mb-1">Category</label>
+                    <select class="form-select" v-model="category">
+                        <option value="" :selected="!category" disabled>-- Select Category --</option>
+                        <option v-for="item in categories" :value="item.id">{{ item.category_name }}</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
                     <label class="mb-1">Content</label>
-                    <textarea rows="15" v-model="body" class="form-control" id="title" placeholder="Content" required></textarea>
+                    <ckeditor 
+                        :editor="editor" 
+                        v-model="body" 
+                        :config="editorConfig"
+                    />
+                    <!-- <textarea rows="15" v-model="body" class="form-control" id="title" placeholder="Content" required></textarea> -->
                 </div>
                 <div class="form-group mb-3">
                     <label>Change Image</label>
@@ -32,6 +44,10 @@
                     <div class="mb-1">
                         <img :src="post?.post_images?.post_image_path" class="img-fluid" :alt="post?.post_images[0]?.post_image_caption">
                     </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="mb-1">Slug</label>
+                    <input v-model="slug" type="text" class="form-control" id="slug" placeholder="Slug" required>
                 </div>
             </form>
             <div class="text-end">
@@ -55,11 +71,39 @@
 
 <script>
     import { Toast } from 'bootstrap';
+    import { 
+        ClassicEditor, 
+        Bold, 
+        Essentials, 
+        Italic, 
+        Mention, 
+        Paragraph, 
+        Undo, 
+        Heading, 
+        List,
+        FontFamily,
+        FontSize,
+        FontColor,
+        FontBackgroundColor,
+        Link,
+        Alignment,
+        Table,
+        TableToolbar,
+        TableCellProperties,
+        TableProperties,
+    } from 'ckeditor5';
+    import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+
+    import 'ckeditor5/ckeditor5.css';
     
     export default {
+    components: {
+        Ckeditor
+    },
     mounted() {
         console.log("Component mounted.");
         this.getPost();
+        this.getCategories();
     },
     data() {
         return {
@@ -67,10 +111,58 @@
             title: "",
             body: "",
             image: "",
+            category:"",
+            slug:"",
             errorMessage: [],
             submitError: false,
             isCreatingPost: false,
-            isLoading: false
+            isLoading: false,
+            isLoadingCategories: false,
+            categories: [],
+            editor: ClassicEditor,
+            editorConfig: {
+                plugins: [ 
+                    Bold, 
+                    Essentials, 
+                    Italic, 
+                    Mention, 
+                    Paragraph, 
+                    Undo,
+                    Heading,
+                    List,
+                    FontFamily,
+                    FontSize,
+                    FontColor,
+                    FontBackgroundColor,
+                    Link,
+                    Alignment,
+                    Table,
+                    TableToolbar,
+                    TableCellProperties,
+                    TableProperties,
+                ],
+                toolbar: [
+                    'undo', 'redo',
+                    '|',
+                    'heading',
+                    '|',
+                    'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+                    '|',
+                    'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+                    '|',
+                    'link', 'uploadImage', 'blockQuote', 'codeBlock',
+                    '|',
+                    'alignment', 'insertTable',
+                    '|',
+                    'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
+                ],
+                table: {
+                    contentToolbar: [ 
+                        'tableColumn', 'tableRow', 'mergeTableCells',
+                        'tableProperties', 'tableCellProperties'
+                    ]
+                }
+            }
         };
     },
     methods: {
@@ -79,6 +171,14 @@
             var toast = new Toast(toastLiveExample);
             toast.show();
         },
+        getCategories() {
+            this.isLoadingCategories = true;
+            axios.post('/dashboard/get-categories')
+                .then(response => (
+                    this.categories = response.data.data,
+                    this.isLoadingCategories = false
+                ))
+        },
         getPost() {
             this.isLoading = true;
             axios.get('/post/get_post_by_id/'+this.$route.params.id)
@@ -86,6 +186,8 @@
                     this.post = response.data.data[0],
                     this.title = this.post.title,
                     this.body = this.post.body,
+                    this.category = this.post.category_id,
+                    this.slug = this.post.slug,
                     this.isLoading = false
                 ))
         },
@@ -98,6 +200,12 @@
             }
             if (!this.body) {
                 this.errorMessage.push("Content cannot be empty");
+            }
+            if (!this.slug) {
+                this.errorMessage.push("Slug cannot be empty");
+            }
+            if (!this.category) {
+                this.errorMessage.push("Category cannot be empty");
             }
             if (this.image && ["image/jpeg", "image/png"].indexOf(this.image.type) === -1) {
                 this.errorMessage.push("File must be JPEG or PNG");
@@ -120,7 +228,9 @@
             formData.append("title", this.title);
             formData.append("body", this.body);
             formData.append("image", this.image);
+            formData.append("slug", this.slug);
             formData.append("id", this.post.id);
+            formData.append("category_id", this.category);
             formData.append("previousImage", this.post.post_images[0]?.id)
             let existingObj = this;
             const config = {

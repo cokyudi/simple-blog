@@ -13,14 +13,30 @@
                     <input v-model="title" type="text" class="form-control" id="title" placeholder="Title" required>
                 </div>
                 <div class="form-group mb-3">
+                    <label class="mb-1">Category</label>
+                    <select class="form-select" v-model="category" v-on:click="getCategories">
+                        <option value="" selected disabled>-- Select Category --</option>
+                        <option v-for="category in categories" :value="category.id">{{ category.category_name }}</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
                     <label class="mb-1">Content</label>
-                    <textarea rows="15" v-model="body" class="form-control" id="title" placeholder="Content" required></textarea>
+                    <ckeditor 
+                        :editor="editor" 
+                        v-model="body" 
+                        :config="editorConfig"
+                    />
+                    <!-- <textarea rows="15" v-model="body" class="form-control" id="title" placeholder="Content" required></textarea> -->
                 </div>
                 <div class="form-group mb-3">
                     <label>Image</label>
                     <div class="mb-1">
                         <input  v-on:change="onChangeImage" type="file" ref="fileupload" class="form-control-file">
                     </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="mb-1">Slug</label>
+                    <input v-model="slug" type="text" class="form-control" id="slug" placeholder="Slug" required>
                 </div>
             </form>
             <div class="text-end">
@@ -44,8 +60,35 @@
 
 <script>
     import { Toast } from 'bootstrap';
+    import { 
+        ClassicEditor, 
+        Bold, 
+        Essentials, 
+        Italic, 
+        Mention, 
+        Paragraph, 
+        Undo, 
+        Heading, 
+        List,
+        FontFamily,
+        FontSize,
+        FontColor,
+        FontBackgroundColor,
+        Link,
+        Alignment,
+        Table,
+        TableToolbar,
+        TableCellProperties, 
+        TableProperties,
+    } from 'ckeditor5';
+    import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+
+    import 'ckeditor5/ckeditor5.css';
     
     export default {
+    components: {
+        Ckeditor
+    },
     mounted() {
         console.log("Component mounted.");
     },
@@ -57,7 +100,55 @@
             image: "",
             errorMessage: [],
             submitError: false,
-            isCreatingPost: false
+            isCreatingPost: false,
+            isLoadingCategories: false,
+            categories: [],
+            category: '',
+            slug: '',
+            editor: ClassicEditor,
+            editorConfig: {
+                plugins: [ 
+                    Bold, 
+                    Essentials, 
+                    Italic, 
+                    Mention, 
+                    Paragraph, 
+                    Undo,
+                    Heading,
+                    List,
+                    FontFamily,
+                    FontSize,
+                    FontColor,
+                    FontBackgroundColor,
+                    Link,
+                    Alignment,
+                    Table,
+                    TableToolbar,
+                    TableCellProperties,
+                    TableProperties,
+                ],
+                toolbar: [
+                    'undo', 'redo',
+                    '|',
+                    'heading',
+                    '|',
+                    'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+                    '|',
+                    'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+                    '|',
+                    'link', 'uploadImage', 'blockQuote', 'codeBlock',
+                    '|',
+                    'alignment', 'insertTable',
+                    '|',
+                    'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
+                ],
+                table: {
+                    contentToolbar: [ 
+                        'tableColumn', 'tableRow', 'mergeTableCells',
+                        'tableProperties', 'tableCellProperties'
+                    ]
+                }
+            }
         };
     },
     methods: {
@@ -66,12 +157,26 @@
             var toast = new Toast(toastLiveExample);
             toast.show();
         },
+        getCategories() {
+            this.isLoadingCategories = true;
+            axios.post('get-categories')
+                .then(response => (
+                    this.categories = response.data.data,
+                    this.isLoadingCategories = false
+                ))
+        },
         onChangeImage(e) {
             this.image = e.target.files[0];
         },
         validateForm() {
             if (!this.title) {
                 this.errorMessage.push("Title cannot be empty");
+            }
+            if (!this.category) {
+                this.errorMessage.push("Category cannot be empty");
+            }
+            if (!this.slug) {
+                this.errorMessage.push("Slug cannot be empty");
             }
             if (!this.body) {
                 this.errorMessage.push("Content cannot be empty");
@@ -99,6 +204,8 @@
             let formData = new FormData();
             formData.append("title", this.title);
             formData.append("body", this.body);
+            formData.append("category_id", this.category);
+            formData.append("slug", this.slug);
             formData.append("image", this.image);
             let existingObj = this;
             const config = {
@@ -112,6 +219,8 @@
                 this.title = "";
                 this.body = "";
                 this.image = "";
+                this.slug = "";
+                this.category = "";
                 this.$refs.fileupload.value = null;
                 this.errorMessage = [];
                 this.submitError = false;

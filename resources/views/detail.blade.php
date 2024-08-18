@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-    <detail-component :id="{{$id}}"></detail-component>
+    <detail-component :action="'{{$action}}'"></detail-component>
 @endsection

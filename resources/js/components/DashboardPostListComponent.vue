@@ -13,6 +13,9 @@
                         <h4 class="card-title text-truncate-4-line">{{ post.title }}</h4>
                     </div>
                     <div class="mt-2">
+                        <span class="badge bg-primary">{{ post.category?.category_name ? post.category.category_name : 'No Category' }}</span>
+                    </div>
+                    <div class="mt-2">
                         <span class="text-muted">By <strong>{{post.author?.name}}</strong></span>
                     </div>
                     <div class="mt-1">

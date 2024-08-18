@@ -19,7 +19,7 @@
                 <img v-if="post?.post_images" :src="post?.post_images?.post_image_path" class="img-fluid" :alt="post?.post_images?.post_image_caption">
             </div>
             <div class="my-5">
-                <p class="lead">{{post.body}}</p>
+                <div v-html="post.body"></div>
             </div>
         </div>
     </div>

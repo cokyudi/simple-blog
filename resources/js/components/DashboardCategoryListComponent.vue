@@ -9,26 +9,23 @@
             <div class="card">
                 <div class="card-body">
                     <div class="mb-2 clearfix">
-                        <button type="button" class="btn btn-primary float-end" @click="userModal('new')">Create New User</button>
+                        <button type="button" class="btn btn-primary float-end" @click="categoryModal('new')">Create New Category</button>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-bordered text-center">
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Action</th>
+                                    <th>Category Name</th>
                                 </tr>
                             </thead>
-                            <tbody v-if="users && users?.length > 0">
-                                <tr v-for="(user,index) in users" :key="index">
+                            <tbody v-if="categories && categories?.length > 0">
+                                <tr v-for="(category,index) in categories" :key="index">
                                     <td>{{ index+1 }}</td>
-                                    <td>{{ user.name }}</td>
-                                    <td>{{ user.email }}</td>
+                                    <td>{{ category.category_name }}</td>
                                     <td>
-                                        <button @click="userModal('edit', user.id)" type="button" class="btn btn-light me-2">Edit</button>
-                                        <button @click="deleteModal(user.id)" type="button" class="btn btn-danger">Delete</button>
+                                        <button @click="categoryModal('edit', category.id)" type="button" class="btn btn-light me-2">Edit</button>
+                                        <button @click="deleteModal(category.id)" type="button" class="btn btn-danger">Delete</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -44,7 +41,7 @@
         </div>
     </div>
     <!-- Modal -->
-    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -59,26 +56,14 @@
                     </div>
                     <form>
                         <div class="form-group mb-3">
-                            <label class="mb-1">Name</label>
-                            <input v-model="name" type="text" class="form-control" id="name" placeholder="Name" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="mb-1">Email</label>
-                            <input v-model="email" type="text" class="form-control" id="email" placeholder="Email" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="mb-1">Password</label>
-                            <input v-model="password" type="password" class="form-control" id="password" placeholder="Password" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="mb-1">Confirm Password</label>
-                            <input v-model="confirmPassword" type="password" class="form-control" id="confirm-password" placeholder="Confirm Password" required>
+                            <label class="mb-1">Category Name</label>
+                            <input v-model="category_name" type="text" class="form-control" id="category_name" placeholder="Category Name" required>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" @click="submitUser">Save changes</button>
+                    <button type="button" class="btn btn-primary" @click="submitCategory">Save changes</button>
                 </div>
             </div>
         </div>
@@ -87,7 +72,7 @@
         <div id="liveToast" class="toast text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
-                    User submitted.
+                    Category submitted.
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -98,15 +83,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Delete User</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Delete Category</h5>
                     <button type="button" ref="CloseDelete" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             <div class="modal-body">
-                Are you sure want to delete this user ?
+                Are you sure want to delete this category ?
             </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" @click="deleteUser(this.deleteUserTemp)">Delete</button>
+                    <button type="button" class="btn btn-danger" @click="deleteUser(this.deleteCategoryTemp)">Delete</button>
                 </div>
             </div>
         </div>
@@ -115,7 +100,7 @@
         <div id="deleteToast" class="toast text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
-                    User Deleted.
+                    Category Deleted.
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -130,23 +115,20 @@
     export default {
     mounted() {
         console.log("Component mounted.");
-        this.getUsers();
+        this.getCategories();
     },
     data() {
         return {
             errorMessage: [],
             submitError: false,
             isLoading: false,
-            users: [],
+            categories: [],
             modalTitle: '',
-            name: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
+            category_name: '',
             action:'',
-            isSubmitUser: false,
-            userId: '',
-            deleteUserTemp: ''
+            isSubmitCategory: false,
+            categoryId: '',
+            deleteCategoryTemp: ''
         };
     },
     methods: {
@@ -160,37 +142,33 @@
             var toast = new Toast(toastLiveExample);
             toast.show();
         },
-        getUsers() {
+        getCategories() {
             this.isLoading = true;
-            axios.post('get-users')
+            axios.post('get-categories')
                 .then(response => (
-                    this.users = response.data.data,
+                    this.categories = response.data.data,
                     this.isLoading = false
                 ))
         },
-        userModal(action, id) {
-            this.name = '';
-            this.email = '';
-            this.password = '';
-            this.confirmPassword = '';
+        categoryModal(action, id) {
+            this.category_name = '';
             this.action = action;
             if (action === 'new') {
-                this.modalTitle = 'Create New User';
+                this.modalTitle = 'Create New Category';
             } else {
-                this.modalTitle = 'Edit User';
+                this.modalTitle = 'Edit Category';
             }
 
-            var myModal = new Modal(document.getElementById('userModal'), {
+            var myModal = new Modal(document.getElementById('categoryModal'), {
                 keyboard: false
             });
             if (id) {
-                this.userId = id;
+                this.categoryId = id;
                 let formData = new FormData();
-                formData.append("id", this.userId);
-                axios.post('get-user-by-id', formData)
+                formData.append("id", this.categoryId);
+                axios.post('get-category-by-id', formData)
                     .then(response => {
-                        this.name = response.data?.data?.name;
-                        this.email = response.data?.data?.email;
+                        this.category_name = response.data?.data?.category_name;
                         myModal.show();
                     })
             } else {
@@ -198,17 +176,8 @@
             }
         },
         validateForm() {
-            if (!this.name) {
-                this.errorMessage.push("Name cannot be empty");
-            }
-            if (!this.email) {
-                this.errorMessage.push("Email cannot be empty");
-            }
-            if (!this.password) {
-                this.errorMessage.push("Password cannot be empty");
-            }
-            if (this.password && this.password!==this.confirmPassword) {
-                this.errorMessage.push("Confirm password doesn't match Password");
+            if (!this.category_name) {
+                this.errorMessage.push("Category Name cannot be empty");
             }
             if (this.errorMessage.length > 0) {
                 this.submitError = true;
@@ -216,25 +185,23 @@
             }
             return true;
         },
-        submitUser(e) {
-            this.isSubmitUser = true;
+        submitCategory(e) {
+            this.isSubmitCategory = true;
             e.preventDefault();
             this.errorMessage = [];
             if (!this.validateForm()) {
-                this.isSubmitUser = false;
+                this.isSubmitCategory = false;
                 return false;
             }
             
             let formData = new FormData();
-            formData.append("name", this.name);
-            formData.append("email", this.email);
-            formData.append("password", this.password);
+            formData.append("category_name", this.category_name);
             let url;
             if (this.action==='new') {
-                url = '/dashboard/create-user'
+                url = '/dashboard/create-category'
             } else {
-                url = '/dashboard/edit-user'
-                formData.append("id", this.userId);
+                url = '/dashboard/edit-category'
+                formData.append("id", this.categoryId);
             }
             let existingObj = this;
             axios.post(url, formData)
@@ -245,7 +212,7 @@
                 this.isSubmitUser = false;
                 this.showToast();
                 this.$refs.Close.click();
-                this.getUsers();
+                this.getCategories();
             })
                 .catch((err) => {
                 existingObj.output = err;
@@ -255,19 +222,19 @@
             var deleteModal = new Modal(document.getElementById('deleteModal'), {
                 keyboard: false
             });
-            this.deleteUserTemp = id;
+            this.deleteCategoryTemp = id;
             deleteModal.show();
         },
-        deleteUser(id) {
+        deleteCategory(id) {
             let existingObj = this;
             let formData = new FormData();
             formData.append("id", id);
-            axios.post("/dashboard/delete-user", formData)
+            axios.post("/dashboard/delete-category", formData)
                 .then((res) => {
                     existingObj.success = res.data.success;
                     this.$refs.CloseDelete.click();
                     this.showDeleteToast();
-                    this.getUsers();
+                    this.getCategories();
                 })
                 .catch((err) => {
                     existingObj.output = err;

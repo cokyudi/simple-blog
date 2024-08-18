@@ -3,7 +3,8 @@ import DashboardNewPostComponent from '../components/DashboardNewPostComponent.v
 import DashboardPostListComponent from '../components/DashboardPostListComponent.vue';
 import DashboardPostDetailComponent from '../components/DashboardPostDetailComponent.vue';
 import DashboardEditPostComponent from '../components/DashboardEditPostComponent.vue';
-import DashboardUserListComponent from '../components/DashboardUserListComponent.vue'
+import DashboardUserListComponent from '../components/DashboardUserListComponent.vue';
+import DashboardCategoryListComponent from '../components/DashboardCategoryListComponent.vue';
 
 const routes = [
     {
@@ -30,6 +31,11 @@ const routes = [
         path:'/dashboard/edit-post/:id',
         name:'edit-post',
         component:DashboardEditPostComponent
+    },
+    {
+        path:'/dashboard/category-list',
+        name:'category-list',
+        component:DashboardCategoryListComponent
     },
 ];
 

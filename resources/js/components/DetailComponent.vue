@@ -20,7 +20,7 @@
                     <img v-if="post?.post_images" :src="post?.post_images?.post_image_path" class="img-fluid" :alt="post?.post_images?.post_image_caption">
                 </div>
                 <div class="my-5">
-                    <p class="lead">{{post.body}}</p>
+                    <div class="ckeditor-display" v-html="post.body"></div>
                 </div>
             </div>
         </div>
@@ -40,15 +40,24 @@
             isLoading:false,
         };
     },
-    props: ['id'],
+    props: ['action'],
     methods: {
         getPost() {
             this.isLoading = true;
-            axios.get('/post/get_post_by_id/'+this.id)
+            if (isNaN(this.action)) {
+                axios.get('/post/get_post_by_slug/'+this.action)
                 .then(response => (
                     this.isLoading = false,
                     this.post = response.data.data[0]
                 ))
+            } else {
+                axios.get('/post/get_post_by_id/'+this.action)
+                .then(response => (
+                    this.isLoading = false,
+                    this.post = response.data.data[0]
+                ))
+            }
+            
         },
         getDay(date) {
             return moment(date).format('dddd')

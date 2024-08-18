@@ -2,7 +2,7 @@
     <div class="container">
         <div class="p-4 p-md-5 mb-4 rounded text-bg-dark" style="background-image: url('https://picsum.photos/1920/1080?grayscale&blur');">
             <div class="col-md-6 px-0">
-                <h1 class="display-4 fst-italic">Simple Blog</h1>
+                <h1 class="display-4 fst-italic">YUDI DHARMA PUTRA's BLOG</h1>
                 <p class="lead my-3">This is my simple blog project, I hope can continue developing and improving this project more in the future.</p>
             </div>
         </div>
@@ -37,7 +37,7 @@
                     <div v-for="post in posts" class="col">
                         <div class="card h-100  cursor-pointer">
                             <img v-if="post?.post_images" :src="post?.post_images.post_image_path" class="card-img-top img-fluid" style="height: 200px;" :alt="post.post_images.post_image_caption">
-                            <div class="card-body" @click="redirectPage('/detail/'+post.id)">
+                            <div class="card-body" @click="redirectPage(post.slug!==''?'/detail/'+post.slug:'/detail/'+post.id)">
                                 <div style="height:100px;">
                                     <h4 class="card-title text-truncate-4-line">{{ post?.title }}</h4>
                                 </div>

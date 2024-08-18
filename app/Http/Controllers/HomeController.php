@@ -26,7 +26,7 @@ class HomeController extends Controller
         return view('home');
     }
 
-    public function detail($id) {
-        return view('detail', compact('id'));
+    public function detail(Request $request, $action) {
+        return view('detail', compact('action'));
     }
 }
